@@ -15,4 +15,5 @@ public interface IMendClient
     Task PatchAsync(string path, object? body = null, CancellationToken cancellationToken = default);
     Task DeleteAsync(string path, CancellationToken cancellationToken = default);
     Task<T?> GetPagedAsync<T>(string path, int? pageSize = null, string? cursor = null, CancellationToken cancellationToken = default);
+    Task<T?> PostPagedAsync<T>(string path, object? body = null, int? limit = null, string? cursor = null, CancellationToken cancellationToken = default);
 }

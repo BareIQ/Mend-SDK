@@ -195,6 +195,70 @@ public sealed class MendApplicationsClientTests
         await Assert.ThrowsAsync<MendAuthException>(() => sut.GetApplicationSummariesTotalsAsync());
     }
 
+    // --- ApplicationSummary deserialization ---
+
+    [Fact]
+    public void ApplicationSummary_DeserializesFromJson_Correctly()
+    {
+        const string json = """
+            [
+              {
+                "uuid": "930ed3f0-e0bb-4e3a-806b-e8448bd66597",
+                "name": "android",
+                "creationDate": "2025-07-05T05:47:20Z",
+                "tags": [],
+                "labels": [],
+                "statistics": {
+                  "ALERTS": {
+                    "criticalSeverityVulnerabilities": 3,
+                    "highSeverityVulnerabilities": 7,
+                    "mediumSeverityVulnerabilities": 12,
+                    "lowSeverityVulnerabilities": 5,
+                    "vulnerableLibraries": 4
+                  },
+                  "GENERAL": {
+                    "totalLibraries": 150,
+                    "totalProjects": 2
+                  },
+                  "LICENSE_RISK": {
+                    "noLicenseLibraries": 4,
+                    "unknownRiskLicenses": 25,
+                    "highRiskLicenses": 14,
+                    "mediumRiskLicenses": 1,
+                    "lowRiskLicenses": 176
+                  },
+                  "LAST_SCAN": {
+                    "lastScanTime": 1768657615145,
+                    "lastScaScanTime": 1768657615145,
+                    "lastImgScanTime": 0,
+                    "lastSastScanTime": 0
+                  }
+                }
+              }
+            ]
+            """;
+
+        var result = JsonSerializer.Deserialize<List<ApplicationSummary>>(json,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        Assert.NotNull(result);
+        Assert.Single(result!);
+        var s = result[0];
+        Assert.Equal("930ed3f0-e0bb-4e3a-806b-e8448bd66597", s.Uuid);
+        Assert.Equal("android", s.Name);
+        Assert.Equal("2025-07-05T05:47:20Z", s.CreationDate);
+        Assert.Empty(s.Tags);
+        Assert.Empty(s.Labels);
+        Assert.NotNull(s.Statistics);
+        Assert.Equal(3,   s.Statistics!.Alerts!.CriticalSeverityVulnerabilities);
+        Assert.Equal(7,   s.Statistics.Alerts.HighSeverityVulnerabilities);
+        Assert.Equal(4,   s.Statistics.Alerts.VulnerableLibraries);
+        Assert.Equal(150, s.Statistics.General!.TotalLibraries);
+        Assert.Equal(2,   s.Statistics.General.TotalProjects);
+        Assert.Equal(14,  s.Statistics.LicenseRisk!.HighRiskLicenses);
+        Assert.Equal(1768657615145L, s.Statistics.LastScan!.LastScanTime);
+    }
+
     // --- GetApplicationSummariesAsync ---
 
     [Fact]
@@ -202,15 +266,22 @@ public sealed class MendApplicationsClientTests
     {
         var summaries = new List<ApplicationSummary>
         {
-            new ApplicationSummary { Uuid = "app-1", Name = "My App", HighSeverityCount = 2 }
+            new ApplicationSummary
+            {
+                Uuid = "app-1", Name = "My App",
+                Statistics = new ApplicationStatistics
+                {
+                    Alerts = new AlertsStatistics { HighSeverityVulnerabilities = 2 }
+                }
+            }
         };
         var request = new ApplicationSummariesRequest { ApplicationUuids = new[] { "app-1" } };
         var expectedPath = $"{ExpectedBasePath}/summaries";
 
         var clientMock = new Mock<IMendClient>();
         clientMock
-            .Setup(c => c.PostAsync<IReadOnlyList<ApplicationSummary>>(
-                expectedPath, request, It.IsAny<CancellationToken>()))
+            .Setup(c => c.PostPagedAsync<IReadOnlyList<ApplicationSummary>>(
+                expectedPath, request, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(summaries);
 
         var sut = new MendApplicationsClient(clientMock.Object, CreateOptions());
@@ -219,7 +290,7 @@ public sealed class MendApplicationsClientTests
         Assert.Single(result);
         Assert.Equal("app-1", result[0].Uuid);
         Assert.Equal("My App", result[0].Name);
-        Assert.Equal(2, result[0].HighSeverityCount);
+        Assert.Equal(2, result[0].Statistics!.Alerts!.HighSeverityVulnerabilities);
     }
 
     [Fact]
@@ -229,13 +300,89 @@ public sealed class MendApplicationsClientTests
 
         var clientMock = new Mock<IMendClient>();
         clientMock
-            .Setup(c => c.PostAsync<IReadOnlyList<ApplicationSummary>>(
-                It.IsAny<string>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
+            .Setup(c => c.PostPagedAsync<IReadOnlyList<ApplicationSummary>>(
+                It.IsAny<string>(), It.IsAny<object>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(IReadOnlyList<ApplicationSummary>));
 
         var sut = new MendApplicationsClient(clientMock.Object, CreateOptions());
         var result = await sut.GetApplicationSummariesAsync(request);
 
         Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetApplicationSummariesAsync_WithLimit_PassesLimitToClient()
+    {
+        var request = new ApplicationSummariesRequest { ApplicationUuids = new[] { "app-1" } };
+        var expectedPath = $"{ExpectedBasePath}/summaries";
+
+        var clientMock = new Mock<IMendClient>();
+        clientMock
+            .Setup(c => c.PostPagedAsync<IReadOnlyList<ApplicationSummary>>(
+                expectedPath, request, 100, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<ApplicationSummary>());
+
+        var sut = new MendApplicationsClient(clientMock.Object, CreateOptions());
+        await sut.GetApplicationSummariesAsync(request, limit: 100);
+
+        clientMock.Verify(c => c.PostPagedAsync<IReadOnlyList<ApplicationSummary>>(
+            expectedPath, request, 100, null, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetApplicationSummariesAsync_WithCursor_PassesCursorToClient()
+    {
+        var request = new ApplicationSummariesRequest { ApplicationUuids = new[] { "app-1" } };
+        var expectedPath = $"{ExpectedBasePath}/summaries";
+
+        var clientMock = new Mock<IMendClient>();
+        clientMock
+            .Setup(c => c.PostPagedAsync<IReadOnlyList<ApplicationSummary>>(
+                expectedPath, request, null, "my-cursor", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<ApplicationSummary>());
+
+        var sut = new MendApplicationsClient(clientMock.Object, CreateOptions());
+        await sut.GetApplicationSummariesAsync(request, cursor: "my-cursor");
+
+        clientMock.Verify(c => c.PostPagedAsync<IReadOnlyList<ApplicationSummary>>(
+            expectedPath, request, null, "my-cursor", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetApplicationSummariesAsync_WithLimitAndCursor_PassesBothToClient()
+    {
+        var request = new ApplicationSummariesRequest { ApplicationUuids = new[] { "app-1" } };
+        var expectedPath = $"{ExpectedBasePath}/summaries";
+
+        var clientMock = new Mock<IMendClient>();
+        clientMock
+            .Setup(c => c.PostPagedAsync<IReadOnlyList<ApplicationSummary>>(
+                expectedPath, request, 50, "next-cursor", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<ApplicationSummary>());
+
+        var sut = new MendApplicationsClient(clientMock.Object, CreateOptions());
+        await sut.GetApplicationSummariesAsync(request, limit: 50, cursor: "next-cursor");
+
+        clientMock.Verify(c => c.PostPagedAsync<IReadOnlyList<ApplicationSummary>>(
+            expectedPath, request, 50, "next-cursor", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetApplicationSummariesAsync_When401_ThrowsMendAuthException()
+    {
+        var request = new ApplicationSummariesRequest { ApplicationUuids = new[] { "app-1" } };
+        var expectedPath = $"{ExpectedBasePath}/summaries";
+
+        var clientMock = new Mock<IMendClient>();
+        clientMock
+            .Setup(c => c.PostPagedAsync<IReadOnlyList<ApplicationSummary>>(
+                It.IsAny<string>(), It.IsAny<object>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new MendAuthException(expectedPath));
+
+        var sut = new MendApplicationsClient(clientMock.Object, CreateOptions());
+        var ex = await Assert.ThrowsAsync<MendAuthException>(
+            () => sut.GetApplicationSummariesAsync(request));
+
+        Assert.Equal(expectedPath, ex.EndpointPath);
     }
 }

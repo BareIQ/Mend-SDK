@@ -2,4 +2,6 @@
   <Project Path="src/Mend.Sdk/Mend.Sdk.csproj" />
   <Project Path="tests/Mend.Sdk.Tests/Mend.Sdk.Tests.csproj" />
   <Project Path="examples/Mend.Sdk.ExampleCli/Mend.Sdk.ExampleCli.csproj" />
+  <Project Path="tools/Mend.Tool/Mend.Tool.csproj" />
+  <Project Path="tests/Mend.Tool.Tests/Mend.Tool.Tests.csproj" />
 </Solution>

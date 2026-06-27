@@ -190,4 +190,81 @@ public sealed class MendClientTests
         Assert.NotNull(captured);
         Assert.DoesNotContain("?", captured!.RequestUri?.ToString() ?? string.Empty);
     }
+
+    // --- PostPagedAsync ---
+
+    [Fact]
+    public async Task PostPagedAsync_WithLimit_AppendsLimitQueryParameter()
+    {
+        HttpRequestMessage? captured = null;
+        var tokenManager = TokenManagerMock();
+        var httpClient = new Mock<IMendHttpClient>();
+        httpClient
+            .Setup(h => h.SendAsync<ApiEnvelope<TestPayload>>(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
+            .Callback<HttpRequestMessage, CancellationToken>((req, _) => captured = req)
+            .ReturnsAsync(default(ApiEnvelope<TestPayload>));
+
+        var sut = new MendClient(tokenManager.Object, httpClient.Object);
+        await sut.PostPagedAsync<TestPayload>("/api/items", limit: 100);
+
+        Assert.NotNull(captured);
+        Assert.Contains("limit=100", captured!.RequestUri?.ToString() ?? string.Empty);
+        Assert.DoesNotContain("pageSize", captured.RequestUri?.ToString() ?? string.Empty);
+    }
+
+    [Fact]
+    public async Task PostPagedAsync_WithCursor_AppendsCursorQueryParameter()
+    {
+        HttpRequestMessage? captured = null;
+        var tokenManager = TokenManagerMock();
+        var httpClient = new Mock<IMendHttpClient>();
+        httpClient
+            .Setup(h => h.SendAsync<ApiEnvelope<TestPayload>>(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
+            .Callback<HttpRequestMessage, CancellationToken>((req, _) => captured = req)
+            .ReturnsAsync(default(ApiEnvelope<TestPayload>));
+
+        var sut = new MendClient(tokenManager.Object, httpClient.Object);
+        await sut.PostPagedAsync<TestPayload>("/api/items", cursor: "next-page-token");
+
+        Assert.NotNull(captured);
+        Assert.Contains("cursor=next-page-token", captured!.RequestUri?.ToString() ?? string.Empty);
+    }
+
+    [Fact]
+    public async Task PostPagedAsync_WithLimitAndCursor_AppendsBothQueryParameters()
+    {
+        HttpRequestMessage? captured = null;
+        var tokenManager = TokenManagerMock();
+        var httpClient = new Mock<IMendHttpClient>();
+        httpClient
+            .Setup(h => h.SendAsync<ApiEnvelope<TestPayload>>(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
+            .Callback<HttpRequestMessage, CancellationToken>((req, _) => captured = req)
+            .ReturnsAsync(default(ApiEnvelope<TestPayload>));
+
+        var sut = new MendClient(tokenManager.Object, httpClient.Object);
+        await sut.PostPagedAsync<TestPayload>("/api/items", limit: 50, cursor: "abc");
+
+        Assert.NotNull(captured);
+        var uri = captured!.RequestUri?.ToString() ?? string.Empty;
+        Assert.Contains("limit=50", uri);
+        Assert.Contains("cursor=abc", uri);
+    }
+
+    [Fact]
+    public async Task PostPagedAsync_WithNoParams_PathIsUnchanged()
+    {
+        HttpRequestMessage? captured = null;
+        var tokenManager = TokenManagerMock();
+        var httpClient = new Mock<IMendHttpClient>();
+        httpClient
+            .Setup(h => h.SendAsync<ApiEnvelope<TestPayload>>(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
+            .Callback<HttpRequestMessage, CancellationToken>((req, _) => captured = req)
+            .ReturnsAsync(default(ApiEnvelope<TestPayload>));
+
+        var sut = new MendClient(tokenManager.Object, httpClient.Object);
+        await sut.PostPagedAsync<TestPayload>("/api/items");
+
+        Assert.NotNull(captured);
+        Assert.DoesNotContain("?", captured!.RequestUri?.ToString() ?? string.Empty);
+    }
 }

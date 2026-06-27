@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Mend.Sdk.Applications.Models;
@@ -10,12 +12,15 @@ public sealed class ApplicationSummary
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
 
-    [JsonPropertyName("highSeverityCount")]
-    public int HighSeverityCount { get; set; }
+    [JsonPropertyName("creationDate")]
+    public string CreationDate { get; set; } = string.Empty;
 
-    [JsonPropertyName("mediumSeverityCount")]
-    public int MediumSeverityCount { get; set; }
+    [JsonPropertyName("tags")]
+    public IReadOnlyList<string> Tags { get; set; } = Array.Empty<string>();
 
-    [JsonPropertyName("lowSeverityCount")]
-    public int LowSeverityCount { get; set; }
+    [JsonPropertyName("labels")]
+    public IReadOnlyList<string> Labels { get; set; } = Array.Empty<string>();
+
+    [JsonPropertyName("statistics")]
+    public ApplicationStatistics? Statistics { get; set; }
 }

@@ -56,6 +56,9 @@ public sealed class MendClient : IMendClient
     public Task<T?> GetPagedAsync<T>(string path, int? pageSize = null, string? cursor = null, CancellationToken cancellationToken = default)
         => GetAsync<T>(BuildPagedPath(path, pageSize, cursor), cancellationToken);
 
+    public Task<T?> PostPagedAsync<T>(string path, object? body = null, int? limit = null, string? cursor = null, CancellationToken cancellationToken = default)
+        => PostAsync<T>(BuildLimitedPath(path, limit, cursor), body, cancellationToken);
+
     private async Task<T?> SendWithResponseAsync<T>(HttpMethod method, string path, object? body, CancellationToken cancellationToken)
     {
         var token = await _tokenManager.GetAccessTokenAsync().ConfigureAwait(false);
@@ -106,6 +109,29 @@ public sealed class MendClient : IMendClient
         if (hasPageSize)
         {
             sb.Append(separator).Append("pageSize=").Append(pageSize!.Value);
+            separator = "&";
+        }
+
+        if (hasCursor)
+            sb.Append(separator).Append("cursor=").Append(Uri.EscapeDataString(cursor!));
+
+        return sb.ToString();
+    }
+
+    private static string BuildLimitedPath(string path, int? limit, string? cursor)
+    {
+        var hasLimit = limit.HasValue;
+        var hasCursor = !string.IsNullOrEmpty(cursor);
+
+        if (!hasLimit && !hasCursor)
+            return path;
+
+        var separator = path.IndexOf('?') >= 0 ? "&" : "?";
+        var sb = new StringBuilder(path);
+
+        if (hasLimit)
+        {
+            sb.Append(separator).Append("limit=").Append(limit!.Value);
             separator = "&";
         }
 

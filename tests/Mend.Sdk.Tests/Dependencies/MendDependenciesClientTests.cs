@@ -27,20 +27,116 @@ public sealed class MendDependenciesClientTests
         const string json = """
             [
               {
-                "uuid": "finding-1",
-                "name": "CVE-2021-1234",
+                "uuid": "4a4dbdef-ed2d-4825-aaaf-7c245da99175",
+                "name": "CVE-2026-33671",
                 "type": "SECURITY_VULNERABILITY",
-                "findingInfo": { "findingStatus": "UNREVIEWED", "status": "ACTIVE" },
-                "component": { "name": "lodash", "version": "4.17.11" },
-                "vulnerability": { "name": "CVE-2021-1234", "severity": "HIGH", "score": 7.5 }
+                "findingInfo": {
+                  "findingStatus": "UNREVIEWED",
+                  "status": "ACTIVE",
+                  "comment": {},
+                  "detectedAt": "2026-03-25T22:22:08Z",
+                  "modifiedAt": "2026-03-25T22:22:08Z"
+                },
+                "project": {
+                  "uuid": "a5f37c00-c888-46b7-923f-e41d6772f449",
+                  "name": "Clarizen.Modernization.Api",
+                  "path": "Clarizen.Modernization.Api",
+                  "applicationUuid": "964aa0c6-53dd-4906-83d9-36075c888bdd"
+                },
+                "application": {
+                  "uuid": "964aa0c6-53dd-4906-83d9-36075c888bdd",
+                  "name": "Clarizen.Modernization.Api"
+                },
+                "component": {
+                  "uuid": "6bf04787-e184-47f6-83b8-bb5540c1b5a3",
+                  "name": "picomatch-2.3.1.tgz",
+                  "description": "Blazing fast glob matcher",
+                  "componentType": "Library",
+                  "libraryType": "NODE_PACKAGED_MODULE",
+                  "language": "NODE_PACKAGED_MODULE",
+                  "references": {
+                    "url": "https://registry.npmjs.org/picomatch/-/picomatch-2.3.1.tgz",
+                    "homePage": "https://github.com/micromatch/picomatch",
+                    "genericPackageIndex": "https://www.npmjs.org/package/picomatch"
+                  },
+                  "groupId": "picomatch",
+                  "artifactId": "picomatch-2.3.1.tgz",
+                  "version": "2.3.1",
+                  "directDependency": false,
+                  "rootLibrary": false,
+                  "path": "/home/jenkins/workspace/package.json",
+                  "dependencyFile": "/home/jenkins/workspace/package.json",
+                  "dependencyType": "Transitive"
+                },
+                "vulnerability": {
+                  "name": "CVE-2026-33671",
+                  "type": "CVSS_3",
+                  "description": "ReDoS vulnerability in picomatch.",
+                  "score": 7.5,
+                  "severity": "HIGH",
+                  "publishDate": "2026-03-26T21:20:48Z",
+                  "modifiedDate": "2026-03-26T22:31:27Z",
+                  "vulnerabilityScoring": [
+                    { "score": 7.5, "severity": "HIGH", "type": "CVSS_3" }
+                  ]
+                },
+                "topFix": {
+                  "id": 181892,
+                  "vulnerability": "CVE-2026-33671",
+                  "type": "UPGRADE_VERSION",
+                  "origin": "WHITESOURCE_EXPERT",
+                  "url": "https://github.com/micromatch/picomatch/commit/abc123",
+                  "fixResolution": "https://github.com/micromatch/picomatch.git - 2.3.2",
+                  "date": "2026-03-25T22:07:10Z",
+                  "message": "Upgrade to version"
+                },
+                "effective": "NO_SHIELD",
+                "reachability": "REACHABILITY_UNAVAILABLE",
+                "threatAssessment": {
+                  "exploitCodeMaturity": "NOT_DEFINED",
+                  "epssPercentage": 0.412
+                },
+                "exploitable": false,
+                "malicious": false,
+                "scoreMetadataVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                "violations": 0,
+                "workflowUuids": [ "" ],
+                "dependencyContexts": [
+                  {
+                    "dependencyType": "TRANSITIVE",
+                    "isDirect": false,
+                    "isTransitive": true,
+                    "directRoots": [
+                      {
+                        "rootLibraryUuid": "7799588d-b3fd-49c3-8393-1fd7fd487d20",
+                        "rootLibraryName": "jest-29.5.14.tgz",
+                        "rootLibraryVersion": "29.5.14"
+                      }
+                    ]
+                  }
+                ]
               },
               {
-                "uuid": "finding-2",
-                "name": "CVE-2021-5678",
+                "uuid": "c67ee91d-acd7-42ff-9c52-88712ef373ed",
+                "name": "CVE-2025-8262",
                 "type": "SECURITY_VULNERABILITY",
-                "findingInfo": { "findingStatus": "IGNORED", "status": "IGNORED" },
-                "component": { "name": "express", "version": "4.18.0" },
-                "vulnerability": { "name": "CVE-2021-5678", "severity": "MEDIUM", "score": 5.3 }
+                "findingInfo": {
+                  "findingStatus": "REMEDIATED",
+                  "status": "LIBRARY_REMOVED",
+                  "detectedAt": "2025-07-28T08:30:46Z",
+                  "modifiedAt": "2025-10-04T08:57:58Z"
+                },
+                "component": { "name": "yarn-1.22.22.tgz", "version": "1.22.22" },
+                "vulnerability": { "name": "CVE-2025-8262", "severity": "MEDIUM", "score": 4.3 },
+                "topFix": {},
+                "effective": "NO_SHIELD",
+                "reachability": "REACHABILITY_UNAVAILABLE",
+                "exploitable": false,
+                "malicious": false,
+                "scoreMetadataVector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:L",
+                "violations": 0,
+                "workflowUuids": [],
+                "dependencyContexts": []
               }
             ]
             """;
@@ -50,13 +146,92 @@ public sealed class MendDependenciesClientTests
 
         Assert.NotNull(result);
         Assert.Equal(2, result!.Count);
-        Assert.Equal("finding-1", result[0].Uuid);
-        Assert.Equal("HIGH", result[0].Severity);
-        Assert.Equal("CVE-2021-1234", result[0].CveName);
-        Assert.Equal("lodash", result[0].LibraryName);
-        Assert.Equal("ACTIVE", result[0].Status);
-        Assert.Equal("finding-2", result[1].Uuid);
-        Assert.Equal("MEDIUM", result[1].Severity);
+
+        var f1 = result[0];
+        Assert.Equal("4a4dbdef-ed2d-4825-aaaf-7c245da99175", f1.Uuid);
+        Assert.Equal("CVE-2026-33671", f1.CveName);
+        Assert.Equal("HIGH", f1.Severity);
+        Assert.Equal("picomatch-2.3.1.tgz", f1.LibraryName);
+        Assert.Equal("ACTIVE", f1.Status);
+        Assert.Equal("SECURITY_VULNERABILITY", f1.Type);
+
+        // findingInfo
+        Assert.Equal("UNREVIEWED", f1.FindingInfo!.FindingStatus);
+        Assert.Equal("2026-03-25T22:22:08Z", f1.FindingInfo.DetectedAt);
+        Assert.Equal("2026-03-25T22:22:08Z", f1.FindingInfo.ModifiedAt);
+
+        // project
+        Assert.Equal("a5f37c00-c888-46b7-923f-e41d6772f449", f1.Project!.Uuid);
+        Assert.Equal("Clarizen.Modernization.Api", f1.Project.Name);
+        Assert.Equal("964aa0c6-53dd-4906-83d9-36075c888bdd", f1.Project.ApplicationUuid);
+
+        // application
+        Assert.Equal("964aa0c6-53dd-4906-83d9-36075c888bdd", f1.Application!.Uuid);
+        Assert.Equal("Clarizen.Modernization.Api", f1.Application.Name);
+
+        // component
+        Assert.Equal("6bf04787-e184-47f6-83b8-bb5540c1b5a3", f1.Component!.Uuid);
+        Assert.Equal("Library", f1.Component.ComponentType);
+        Assert.Equal("NODE_PACKAGED_MODULE", f1.Component.LibraryType);
+        Assert.Equal("picomatch", f1.Component.GroupId);
+        Assert.Equal("picomatch-2.3.1.tgz", f1.Component.ArtifactId);
+        Assert.Equal("2.3.1", f1.Component.Version);
+        Assert.False(f1.Component.DirectDependency);
+        Assert.False(f1.Component.RootLibrary);
+        Assert.Equal("Transitive", f1.Component.DependencyType);
+        Assert.Equal("https://registry.npmjs.org/picomatch/-/picomatch-2.3.1.tgz", f1.Component.References!.Url);
+        Assert.Equal("https://www.npmjs.org/package/picomatch", f1.Component.References.GenericPackageIndex);
+
+        // vulnerability
+        Assert.Equal("CVSS_3", f1.Vulnerability!.Type);
+        Assert.Equal("2026-03-26T21:20:48Z", f1.Vulnerability.PublishDate);
+        Assert.Equal("2026-03-26T22:31:27Z", f1.Vulnerability.ModifiedDate);
+        Assert.Single(f1.Vulnerability.VulnerabilityScoring);
+        Assert.Equal(7.5, f1.Vulnerability.VulnerabilityScoring[0].Score);
+        Assert.Equal("HIGH", f1.Vulnerability.VulnerabilityScoring[0].Severity);
+        Assert.Equal("CVSS_3", f1.Vulnerability.VulnerabilityScoring[0].Type);
+
+        // topFix
+        Assert.Equal(181892L, f1.TopFix!.Id);
+        Assert.Equal("CVE-2026-33671", f1.TopFix.Vulnerability);
+        Assert.Equal("UPGRADE_VERSION", f1.TopFix.Type);
+        Assert.Equal("WHITESOURCE_EXPERT", f1.TopFix.Origin);
+        Assert.Equal("Upgrade to version", f1.TopFix.Message);
+        Assert.Equal("2026-03-25T22:07:10Z", f1.TopFix.Date);
+
+        // top-level scalar fields
+        Assert.Equal("NO_SHIELD", f1.Effective);
+        Assert.Equal("REACHABILITY_UNAVAILABLE", f1.Reachability);
+        Assert.Equal("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", f1.ScoreMetadataVector);
+        Assert.False(f1.Exploitable);
+        Assert.False(f1.Malicious);
+        Assert.Equal(0, f1.Violations);
+
+        // threatAssessment
+        Assert.Equal("NOT_DEFINED", f1.ThreatAssessment!.ExploitCodeMaturity);
+        Assert.Equal(0.412, f1.ThreatAssessment.EpssPercentage);
+
+        // dependencyContexts
+        Assert.Single(f1.DependencyContexts);
+        var ctx = f1.DependencyContexts[0];
+        Assert.Equal("TRANSITIVE", ctx.DependencyType);
+        Assert.False(ctx.IsDirect);
+        Assert.True(ctx.IsTransitive);
+        Assert.Single(ctx.DirectRoots);
+        Assert.Equal("7799588d-b3fd-49c3-8393-1fd7fd487d20", ctx.DirectRoots[0].RootLibraryUuid);
+        Assert.Equal("jest-29.5.14.tgz", ctx.DirectRoots[0].RootLibraryName);
+        Assert.Equal("29.5.14", ctx.DirectRoots[0].RootLibraryVersion);
+
+        // second finding — empty topFix, no threatAssessment
+        var f2 = result[1];
+        Assert.Equal("c67ee91d-acd7-42ff-9c52-88712ef373ed", f2.Uuid);
+        Assert.Equal("MEDIUM", f2.Severity);
+        Assert.Equal("LIBRARY_REMOVED", f2.Status);
+        Assert.NotNull(f2.TopFix);
+        Assert.Equal(0L, f2.TopFix!.Id);
+        Assert.Null(f2.ThreatAssessment);
+        Assert.Empty(f2.DependencyContexts);
+        Assert.Equal("2025-07-28T08:30:46Z", f2.FindingInfo!.DetectedAt);
     }
 
     [Fact]

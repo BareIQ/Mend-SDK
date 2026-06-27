@@ -35,10 +35,12 @@ public sealed class MendApplicationsClient : IMendApplicationsClient
 
     public async Task<IReadOnlyList<ApplicationSummary>> GetApplicationSummariesAsync(
         ApplicationSummariesRequest request,
+        int? limit = null,
+        string? cursor = null,
         CancellationToken cancellationToken = default)
     {
         var response = await _client
-            .PostAsync<IReadOnlyList<ApplicationSummary>>($"{BasePath}/summaries", request, cancellationToken)
+            .PostPagedAsync<IReadOnlyList<ApplicationSummary>>($"{BasePath}/summaries", request, limit, cursor, cancellationToken)
             .ConfigureAwait(false);
         return response ?? Array.Empty<ApplicationSummary>();
     }
