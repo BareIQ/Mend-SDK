@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "DevBoard": {
+      "type": "stdio",
+      "command": "devboard",
+      "args": []
+    }
+  }
+}
