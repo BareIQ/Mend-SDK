@@ -8,6 +8,15 @@
     <WarningLevel>5</WarningLevel>
     <AssemblyName>Mend.Sdk</AssemblyName>
     <RootNamespace>Mend.Sdk</RootNamespace>
+    <!-- NuGet package metadata -->
+    <PackageId>BareIQ.MendSdk</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Parimal Raj</Authors>
+    <Description>Strongly-typed C# client for the Mend Platform 3.0 REST API. Covers authentication, projects, applications, scans, SCA/SAST/AI/zero-day findings, and async report exports.</Description>
+    <PackageTags>mend whitesource sca sast security vulnerability</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/BareIQ/Mend-SDK</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>

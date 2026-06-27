@@ -1,0 +1,62 @@
+name: Publish NuGet Packages
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish:
+    name: Build, Test & Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.x
+            9.x
+            10.x
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+
+      - name: Test — Mend.Sdk
+        run: dotnet test tests/Mend.Sdk.Tests --no-build -c Release --logger "console;verbosity=minimal"
+
+      - name: Test — Mend.Tool
+        run: dotnet test tests/Mend.Tool.Tests --no-build -c Release --logger "console;verbosity=minimal"
+
+      - name: Pack Mend.Sdk
+        run: |
+          dotnet pack src/Mend.Sdk \
+            -c Release \
+            --no-build \
+            -p:Version=${{ steps.version.outputs.VERSION }} \
+            -o nupkg
+
+      - name: Pack Mend.Tool (mendcli)
+        run: |
+          dotnet pack tools/Mend.Tool \
+            -c Release \
+            --no-build \
+            -p:Version=${{ steps.version.outputs.VERSION }} \
+            -o nupkg
+
+      - name: Push to NuGet.org
+        run: |
+          dotnet nuget push "nupkg/*.nupkg" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate

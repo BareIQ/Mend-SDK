@@ -6,6 +6,12 @@
     <ToolCommandName>mendcli</ToolCommandName>
     <PackageId>BareIQ.MendCli</PackageId>
     <Version>0.1.0</Version>
+    <Authors>Parimal Raj</Authors>
+    <Description>mendcli — terminal-native Mend security vulnerability viewer. List projects, browse active CVEs, and get fix recommendations directly from the command line.</Description>
+    <PackageTags>mend whitesource sca security vulnerability dotnet-tool cli</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/BareIQ/Mend-SDK</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>5</WarningLevel>
