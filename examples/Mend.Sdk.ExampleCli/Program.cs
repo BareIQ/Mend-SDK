@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mend.Sdk.Applications;
-using Mend.Sdk.Client;
 using Mend.Sdk.Dependencies;
 using Mend.Sdk.Dependencies.Models;
 using Mend.Sdk.Extensions;
@@ -19,17 +17,13 @@ var services = new ServiceCollection();
 services.AddMendSdk(config);
 var provider = services.BuildServiceProvider();
 
-var client = provider.GetRequiredService<IMendClient>();
 var projectsClient = provider.GetRequiredService<IMendProjectsClient>();
-var applicationClient = provider.GetRequiredService<IMendApplicationsClient>();
 var dependenciesClient = provider.GetRequiredService<IMendDependenciesClient>();
 
 Console.WriteLine("Mend SDK — Project Browser");
 Console.WriteLine();
 
 var projects = await projectsClient.GetProjectsAsync();
-
-var applications = await applicationClient.GetApplicationsAsync();
 
 if (projects.Count == 0)
 {
