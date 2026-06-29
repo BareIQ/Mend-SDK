@@ -9,7 +9,7 @@
     <AssemblyName>Mend.Sdk</AssemblyName>
     <RootNamespace>Mend.Sdk</RootNamespace>
     <!-- NuGet package metadata -->
-    <PackageId>BareIQ.MendSdk</PackageId>
+    <PackageId>MendSdk</PackageId>
     <Version>0.1.0</Version>
     <Authors>Parimal Raj</Authors>
     <Description>Strongly-typed C# client for the Mend Platform 3.0 REST API. Covers authentication, projects, applications, scans, SCA/SAST/AI/zero-day findings, and async report exports.</Description>

@@ -4,7 +4,7 @@
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>mendcli</ToolCommandName>
-    <PackageId>BareIQ.MendCli</PackageId>
+    <PackageId>MendCli</PackageId>
     <Version>0.1.0</Version>
     <Authors>Parimal Raj</Authors>
     <Description>mendcli — terminal-native Mend security vulnerability viewer. List projects, browse active CVEs, and get fix recommendations directly from the command line.</Description>
